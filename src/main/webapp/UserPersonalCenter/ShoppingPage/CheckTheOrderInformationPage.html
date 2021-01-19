@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>订单核对页面</title>
+    <script src="../../boot&jquery/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="../../boot&jquery/css/bootstrap.css">
+    <script src="../../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../../static/css/HoriZontalCenterTable.css">
+
+    <script>
+
+        $(function () {
+            showAddress();
+            show2();
+        })
+
+        //展示此用户所有地址
+        function showAddress(){
+            $.ajax({
+                url:"/Book/checktheorder?op=findMore",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html+=
+                            "<tr>"+
+                            "<td><input type='radio' value='"+q.adid+"' class='c' name='adid' checked /></td>"+
+                            "<td>"+q.adname+"</td>"+
+                            "<td>"+q.adphone+"</td>"+
+                            "<td>"+q.adress+"</td>"+
+                            "<tr>"
+                    }
+                    $("#no1").html(html);
+                }
+            })
+        }
+
+        //展示商品
+        function show2() {
+            let url = window.location.href;
+            let a = url.split("?")[1];
+            let c = a.split("&")[0];
+            let d = c.split("=")[1];
+            let e = a.split("&")[1];
+            let w = e.split("=")[1];
+            $("#mm").val(d);
+            $("#q1").text(w);
+            $.ajax({
+                url:"/Book/checktheorder?op=findByMore&"+c,
+                type:"post",
+                dataType:"json",
+                sync: false,
+                success:function (list) {
+                   let html2="";
+                    for (let i in list){
+                        let q = list[i];
+                            html2+="<tr>" +
+                            "<td><img src='"+q.book.path+"' alt=''/></td>"+
+                            "<td>"+q.book.bname+"</td>"+
+                            "<td>"+q.book.bprice+"</td>"+
+                            "<td>"+q.sonumber+"</td>"+
+                            "<td id='money'>"+q.sostotalprice+"</td>"+
+                            "</tr>"
+                    }
+                    $("#no3").html(html2);
+                }
+            })
+        }
+
+
+
+
+    </script>
+</head>
+<body>
+<input type="hidden" id="mm">
+<h1 class="text-center">我的购物车</h1>
+<h3 style="color:#b9def0;">填写核对订单信息</h3>
+<div class="container" >
+    <div class="jumbotron" style="background-color: #dca7a7">
+        <table class="table table-hover">
+            <caption><h4>收货人信息</h4></caption>
+            <thead>
+            <tr>
+                <th>选择</th>
+                <th>收货人姓名</th>
+                <th>联系方式</th>
+                <th>地址</th>
+            </tr>
+            </thead>
+            <tbody id="no1">
+            <tr>
+                <td>Tanmay</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<hr style="color:red"/>
+<table class="table table-striped">
+    <caption><h3 class="text-center">购买的商品</h3></caption>
+    <thead>
+    <tr>
+        <th>图片</th>
+        <th>商品名称</th>
+        <th>单价</th>
+        <th>数量</th>
+        <th>小计</th>
+    </tr>
+    </thead>
+    <tbody id="no3">
+    <tr>
+        <td>T</td>
+    </tr>
+    </tbody>
+</table>
+
+<hr style="color:red"/>
+<div class="container">
+    <div class="jumbotron">
+        <h1>总计金额:¥&nbsp;<span id="q1" style="color: black">0</span></h1>
+    </div>
+</div>
+
+<input type="button" class="btn btn-primary btn-lg btn-block" value="确认无误提交订单" onclick="submit()"/>
+
+</body>
+
+<script>
+
+    //提交订单
+    function submit() {
+        let adid = $('input:radio:checked').val();
+        let onumbers = $("#mm").val();
+        $.ajax({
+            url:"/Book/checktheorder?op=updateMore",
+            type:"post",
+            dataType:"json",
+            data:{"adid":adid,"onumbers":onumbers},
+            sync:true,
+            success:function (b) {
+                if(b){
+                    window.location.href=window.origin+"/Book/UserPersonalCenter/ShoppingPage/OrderPaymentPage.html?onumbers="+onumbers;
+                }else {
+                    alert("订单提交失败!");
+                }
+            }
+        })
+    }
+</script>
+</html>

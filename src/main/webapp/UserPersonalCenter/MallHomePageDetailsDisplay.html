@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商城首页详情</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <script src="../boot&jquery/js/npm.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap-theme.css">
+    <style>
+        h4{
+            color: red;
+        }
+    </style>
+    <script>
+        //页面加载执行的事件
+        $(function () {
+            geturl();
+        })
+
+        //展示全部商品
+        function show(url) {
+            $.ajax({
+                url:url,
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html+="           <div class='col-sm-6 col-md-3'>" +
+                            "                <div class='thumbnail'>" +
+                            "                    <img src='"+q.path+"' alt=''>" +
+                            "                    <div class='caption'>" +
+                            "                        <h3>"+q.bname+"</h3>" +
+                            "                        <p>售价:"+q.bprice+"元</p>" +
+                            "                        <p>" +
+                            "                            <a href='/Book/UserPersonalCenter/BookDetailsDisplay.html?bid="+q.bid+"' class='btn btn-primary' role='button'>" +
+                            "                                详情" +
+                            "                            </a>" +
+                            "                            <input type='button' class='btn btn-default' value='加入购物车' onclick='ADDCar("+q.bid+","+q.bprice+")'/>" +
+                            "                        </p>" +
+                            "                    </div>" +
+                            "                </div>"+
+                            "                </div>"
+                    }
+                    $("#p1").html(html);
+                    sellingBook();
+                }
+            })
+        }
+        
+        //展示热卖商品
+        function sellingBook() {
+            $.ajax({
+                url: "/Book/bookshow?op=findegroup",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "<h4>热卖商品</h4>";
+                    for (let i in list) {
+                        let q = list[i];
+                        html += "           <div class='col-sm-6 col-md-6'>" +
+                            "                <div class='thumbnail'>" +
+                            "                    <img src='" + q.path + "' alt=''>" +
+                            "                    <div class='caption'>" +
+                            "                        <h3>" + q.bname + "</h3>" +
+                            "                        <p>售价:" + q.bprice + "元</p>" +
+                            "                        <p>" +
+                            "                            <a href='/Book/UserPersonalCenter/BookDetailsDisplay.html?bid=" + q.bid + "' class='btn btn-primary' role='button'>" +
+                            "                                详情" +
+                            "                            </a>" +
+                            "                            <input type='button' class='btn btn-default' value='加入购物车' onclick='ADDCar(" + q.bid + "," + q.bprice + ")'/>" +
+                            "                        </p>" +
+                            "                    </div>" +
+                            "                </div>" +
+                            "                </div>"
+                    }
+                    $("#p2").html(html);
+                }
+            })
+        }
+
+        //添加一条购物车信息
+        function ADDCar(bid,bprice) {
+            $.ajax({
+                url:"/Book/shoppingcar?op=ADDCar&bid="+bid+"&bprice="+bprice,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        parent.findNumber();
+                    }else {
+                        window.location.href = location.origin + "/Book/UserPersonalCenter/UserloginPage.html";
+                    }
+                }
+            })
+        }
+
+        //获取url
+        function geturl(){
+          let bookurl = window.location.href;
+          let tid = bookurl.split("?")[1];
+          if (tid != undefined){
+              show("/Book/bookshow?op=findMore&"+tid);
+          }else {
+              show("/Book/bookshow?op=findMore");
+          }
+        }
+
+    </script>
+</head>
+<body>
+<div class="col-lg-8" id="p1">
+
+        <div class="col-sm-6 col-md-3">
+            <div class="thumbnail">
+                <img src="/wp-content/uploads/2014/06/kittens.jpg"
+                     alt="通用的占位符缩略图">
+                <div class="caption">
+                    <h3>缩略图标签</h3>
+                    <p>一些示例文本。一些示例文本。</p>
+                    <p>
+                        <a href="#" class="btn btn-primary" role="button">
+                            按钮
+                        </a>
+                        <a href="#" class="btn btn-default" role="button">
+                            按钮
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+</div>
+
+<div class="col-lg-4" id="p2" style="border-left-style: dotted">
+    <h3 style="color: red">热卖商品</h3>
+        <div class="col-sm-6 col-md-6">
+            <div class="thumbnail">
+                <img src="/wp-content/uploads/2014/06/kittens.jpg"
+                     alt="通用的占位符缩略图">
+                <div class="caption">
+                    <h3>缩略图标签</h3>
+                    <p>一些示例文本。一些示例文本。</p>
+                    <p>
+                        <a href="#" class="btn btn-primary" role="button">
+                            按钮
+                        </a>
+                        <a href="#" class="btn btn-default" role="button">
+                            按钮
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+</div>
+</body>
+</html>

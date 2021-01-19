@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.AddressDAOMapper">
+
+    <resultMap id="rs" type="address">
+        <result property="adid" column="adid"/>
+        <result property="adname" column="adname"/>
+        <result property="adphone" column="adphone"/>
+        <result property="adress" column="adress"/>
+        <association property="user" javaType="user">
+            <id property="uid" column="uid"/>
+            <result property="uname" column="uname"/>
+            <result property="uemail" column="uemail"/>
+            <result property="uphoto" column="uphoto"/>
+        </association>
+    </resultMap>
+
+    <select id="findMore" resultMap="rs" parameterType="address">
+        select adid, adname, adphone, adress, uid
+        from Address
+        <where>
+            <if test="user.uid != null and user.uid >0">
+                and uid = #{user.uid}
+            </if>
+            <if test="adid != null and adid > 0">
+                and adid = #{adid}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertADD" parameterType="address">
+        insert into Address
+            (adname, adphone, adress, uid)
+            value
+            (#{adname},#{adphone},#{adress},#{user.uid})
+    </insert>
+
+    <delete id="deleteID">
+        delete from Address
+        where adid = #{adid}
+    </delete>
+
+    <delete id="deleteIDmore" parameterType="java.util.Arrays">
+        delete from Address
+        where adid in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateID" parameterType="address">
+        update Address
+        <set>
+            <if test="adname!=null and adname!=''">
+                ,adname=#{adname}
+            </if>
+            <if test="adphone!=null and adphone!=''">
+                ,adphone=#{adphone}
+            </if>
+            <if test="adress!=null and adress!=''">
+                ,adress=#{adress}
+            </if>
+        </set>
+        where adid = #{adid}
+    </update>
+
+</mapper>

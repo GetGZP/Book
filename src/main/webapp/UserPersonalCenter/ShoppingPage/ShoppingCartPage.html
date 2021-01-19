@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车页面</title>
+    <script src="../../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../../static/css/HoriZontalCenterTable.css">
+
+    <script>
+
+        //页面加载完成后执行
+        $(function () {
+            show();
+        })
+
+
+
+        //获取购物车总金额
+        function money() {
+            let money = 0;
+            $(".c:not(.c:first)").each(function () {
+                if(this.checked==true){
+                    let id = $(this).val();
+                    money = ((money *10) + (id * 10)) / 10;
+                }
+            })
+            $("#p0").text(money);
+        }
+
+        //展示购物车
+        function show() {
+            $.ajax({
+                url:"/Book/shoppingcar?op=findMore",
+                type: "post",
+                dataType: "json",
+                success:function (more) {
+                    let html = "";
+                    for (let i in more){
+                        let q = more[i];
+                        html+="<tr>" +
+                            "<td><input type='checkbox' value='"+q.stotalprice+"' class='c' name='"+q.sid+"' onclick='money()'/></td>"+
+                            "<td><img src='"+q.book.path+"' alt=''></td>"+
+                            "<td>"+q.book.bname+"</td>"+
+                            "<td>"+q.book.bprice+"</td>"+
+                            "<td>" +
+                            "<input type='button' value='+' onclick='findPanDingjia("+q.book.bid+")'/>"+
+                            "<input type='text' value='"+q.snumber+"' class='"+q.book.bid+"' onkeyup='findPanDingput("+q.book.bid+")' style='text-align: center;'/>"+
+                            "<input type='button' value='-' onclick='findPanDingjian("+q.book.bid+")'/>"+
+                            "</td>"+
+                            "<td id='"+q.book.bid+"'>"+q.stotalprice+"</td>"+
+                            "<td>" +
+                            "<input type='button' class='btn btn-danger' onclick='deleteCar("+q.sid+")' value='删除'/>"+
+                            "</td>"+
+                            "</tr>"
+                    }
+                    $("tbody").html(html);
+                }
+            })
+        }
+
+        //单击删除
+        function deleteCar(sid){
+            $.ajax({
+                url:"/Book/shoppingcar?op=deleteCar&sid="+sid,
+                type:"post",
+                dataType:"json",
+                sync: true,
+                success:function (b) {
+                    if(b){
+                        show();
+                    }else {
+                        alert("删除失败!");
+                    }
+                }
+            })
+        }
+
+        //调用+法
+        function findPanDingjia(bid) {
+            let panding = "jia";
+            findPanDing(bid,panding);
+        }
+
+        //调用-法
+        function findPanDingjian(bid) {
+            if($("."+bid+"").val() <= 1){
+                alert("商品数量最少为1件!");
+            }else {
+                let panding = "jian";
+                findPanDing(bid,panding);
+            }
+        }
+
+        //判定输入的数是否大于等于1
+        function Check(fltValue){
+            let tmp;
+            let temp;
+            let i;
+
+            tmp =fltValue;
+            for(i=0;i<tmp.length;i++)
+            {
+                temp=tmp.substring(i,i+1);
+                if(temp > '0' && temp <='9'){
+                }else {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        //put输入
+        function findPanDingput(bid) {
+            if (Check($("."+bid+"").val())){
+                let panding = "put";
+                findPanDing(bid,panding);
+            }else {
+                $("."+bid+"").val(1);
+                alert("商品数量最少为1件!");
+            }
+        }
+
+        //处理数据
+        function findPanDing(bid,panding) {
+            let snumber = $("."+bid).val();
+                $.ajax({
+                    url:"/Book/shoppingcar?op=findPanDing&bid="+bid+"&snumber="+snumber+"&panding="+panding,
+                    type: "post",
+                    dataType: "json",
+                    sync:true,
+                    success:function (list) {
+                        let q = list[0];
+                        $("."+bid+"").val(q.snumber);
+                        $("#"+bid+"").text(q.stotalprice);
+                        $("[name="+q.sid+"]").val(q.stotalprice);
+                        money();
+                    }
+                })
+
+        }
+
+    </script>
+</head>
+<body>
+
+<form>
+    <table class="table table-hover table-bordered">
+        <caption class="text-center"><h2>我的购物车</h2></caption>
+        <thead>
+        <tr>
+            <th><input type="checkbox" class="c"/>全选</th>
+            <th>图片</th>
+            <th>商品名称</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>小计</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Tanmay</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
+<div style="background-color: #F9F9F9; height: 50px;">
+    <h3 style="margin-left: 1170px; line-height: 50px;" >金额总计:¥ &nbsp;&nbsp;<span style="color: #333333" id="p0">0</span></h3>
+</div>
+<br/><br/>
+
+    <div class="btn-group btn-group-lg pull-right" style="margin-right: 50px">
+        <button type="button" class="btn btn-default btn-success" onclick="shop()">继续购物</button>
+        <button type="button" class="btn btn-default btn-danger" onclick="jiesuan()">去结算</button>
+    </div>
+
+</body>
+    <script>
+
+        //结算页面
+        function jiesuan() {
+            let a = $("#p0").text();
+            let q = "";
+            $(".c:not(.c:first)").each(function () {
+                if(this.checked==true){
+                    q += "&sid=";
+                    q += $(this).attr('name');
+                }
+            })
+            $.ajax({
+                url:"/Book/shoppingcar?op=findADDOrder&omoney="+a+q,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (Onumbers) {
+                    window.location.href=location.origin+"/Book/UserPersonalCenter/ShoppingPage/CheckTheOrderInformationPage.html?Onumbers="+Onumbers+"&omoney="+a;
+                }
+            })
+        }
+
+        //继续购物
+        function shop(){
+            top.location.href=window.origin+"/Book/MainHomePage.html";
+        }
+
+        //全选功能
+        $(function () {
+            $(".c:first").click(function () {
+                let f = $(".c:first").prop("checked");
+                $(".c:not(.c:first)").prop("checked",f);
+                money();
+            })
+        })
+    </script>
+</html>

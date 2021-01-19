@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单</title>
+    <script src="../../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../../static/css/HoriZontalCenterTable.css">
+    <script>
+        $(function () {
+            myorderpage();
+        })
+
+        //展示订单
+        function myorderpage() {
+            $.ajax({
+                url:"/Book/myorderpage?op=findByMore",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html +="<tr>"+
+                            "<td>"+q.onumbers+"</td>"+
+                            "<td>"+q.ordertime+"</td>"+
+                            "<td>"+q.user.uname+"</td>"+
+                            "<td>支付宝</td>"+
+                            "<td>"+q.omoney+"</td>"+
+                            "<td>"+q.ostatus+"</td>"+
+                            "<td>" +
+                            "<input type='button' class='btn btn-primary'  data-toggle= 'modal' data-target= '#myModal' onclick='showmodai("+q.onumbers+")' value='查看'/>";
+                            if(q.ostatus == "待付款") {
+                                html += "<button type='button' class='btn btn-danger' onclick='fukuan("+q.onumbers+")'>付款</button>";
+                            }
+                            if(q.ostatus == "已发货"){
+                                html += "<button type='button' class='btn btn-danger' onclick='queren("+q.onumbers+")'>确认收货</button>";
+                            }
+                           html += "</td>"+
+                                   "</tr>";
+                    }
+                    $("#tbody").html(html);
+                }
+            })
+        }
+
+        //修改订单状态为待发货
+        function fukuan(onumbers) {
+            updateMore("待发货",onumbers);
+        }
+
+        //修改订单状态为已收货
+        function queren(onumbers) {
+            updateMore("已收货",onumbers);
+        }
+
+        //修改订单
+        function updateMore(ostatus,onumbers) {
+            $.ajax({
+                url: "/Book/myorderpage?op=updateMore&ostatus="+ostatus+"&onumbers="+onumbers,
+                type: "post",
+                dataType: "json",
+                sync: true,
+                success:function (b){
+                    if(b){
+                        myorderpage();
+                    }else {
+                        alert("修改失败!");
+                    }
+                }
+            })
+        }
+
+        //展示模态框数据
+        function showmodai(onumbers) {
+            $.ajax({
+                url: "/Book/myorderpage?op=findByMores&onumbers=" + onumbers,
+                type: "post",
+                dataType: "json",
+                sync: true,
+                success: function (list) {
+                    let html = "";
+                    for (let i in list) {
+                        let q = list[i];
+                        html += "<tr>" +
+                            "<td>" + (i * 1 + 1) + "</td>" +
+                            "<td>" + q.book.bname + "</td>" +
+                            "<td><img src='" + q.book.path + "' alt='' name='avarimgs'></td>" +
+                            "<td>" + q.sonumber + "</td>" +
+                            "<td>" + q.book.bprice + "</td>" +
+                            "<td>" + q.sostotalprice + "</td>" +
+                            "</tr>"
+                    }
+                    $("#tbody2").html(html);
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<table class="table table-hover">
+    <caption class="text-center"><h2>我的订单</h2></caption>
+    <thead>
+    <tr>
+        <th>订单编号</th>
+        <th>下单日期</th>
+        <th>收货人</th>
+        <th>支付方式</th>
+        <th>总金额</th>
+        <th>订单状态</th>
+        <th>编辑</th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    <tr>
+        <td>Tanmay</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="fom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">订单详情</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="p2">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>商品名称</th>
+                        <th>图片</th>
+                        <th>数量</th>
+                        <th>价格</th>
+                        <th>小计</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody2">
+                    <tr>
+                        <td>Tanmay</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="reset" class="btn btn-default" data-dismiss="modal" >关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal -->
+</div>
+</body>
+    <script>
+        //关闭模态框后清除数据
+        $(function () {
+            $('#myModal').on('hide.bs.modal', function (e) {
+                $('#fom')[0].reset();
+                $("[name = avarimgs]").each(function () {
+                    $(this).attr("src",'');
+                })
+            })
+        })
+    </script>
+</html>

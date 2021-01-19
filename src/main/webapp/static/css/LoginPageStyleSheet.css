@@ -1,0 +1,22 @@
+#main{
+    background-color: rgba(0,0,0,0.1);
+    width: 500px;
+    height:400px;
+    color: white;
+}
+.col-center-block {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform:  translateY(-50%);
+    -ms-transform:  translateY(-50%);
+    -o-transform:  translateY(-50%);
+    transform:  translateY(-50%);
+}
+body{
+    background: url('/Book/img/timg-2.jpeg') no-repeat;
+    background-size: 1500px;
+    text-align: center;
+    margin: 0 auto;
+}
+

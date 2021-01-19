@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户头像修改</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <script src="../boot&jquery/js/npm.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <style>
+        h1{
+            margin-bottom: 20px;
+        }
+        #div1{
+            height: 200px;
+            width: 50%;
+            margin-left: 70px;
+            border-style: solid;
+            border-color: #F5F5F5;
+            background-color: #F5F5F5;
+        }
+        body{
+            background-color: #FCFCFC;
+        }
+        img{
+            width: 230px;
+            height: 200px;
+        }
+    </style>
+
+    <script>
+
+        //页面加载完成后执行
+        $(function () {
+            findMore();
+        })
+
+        //展示头像
+        function findMore() {
+            $.ajax({
+                url: "/Book/usermodifies?op=findMore",
+                type: "post",
+                dataType:"json",
+                sync: false,
+                success:function (list) {
+                    $("#avarimgs").prop("src",list[0].uphoto);
+                }
+            })
+        }
+
+        //更新头像
+        function updateUser() {
+            let data = new FormData();
+            data.append("xdaTanFileImg",$("#xdaTanFileImg").get(0).files[0]);
+            $.ajax({
+                url:"/Book/usermodifies?op=updateUser",
+                type:"post",
+                contentType: false,
+                processData: false,
+                data:data,
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        alert("修改成功!");
+                    }else {
+                        alert("修改失败!");
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+        <h1 class="text-center">修改头像</h1>
+            <h3 style="margin-left: 65px">用户头像</h3>
+            <img src="" class="img-rounded col-lg-5 pull-left" alt="" id="avarimgs"/>
+        <div class="col-lg-7 pull-left text-center" id="div1">
+            <form role="form"  enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="sr-only" for="xdaTanFileImg">请选择头像:</label>
+                    <input type="file" name="pclogo" id="xdaTanFileImg" onchange="xmTanUploadImg(this)" style="margin: 30px 0 30px 30%">
+                    <p class="help-block">请上传头像</p>
+                </div>
+                <div class="btn-group btn-group-lg">
+                    <input type="button" class="btn btn-default btn-info" value="提交" onclick="updateUser()"/>
+                    <input type="reset" class="btn btn-default btn-warning" value="取消"/>
+                </div>
+            </form>
+        </div>
+</body>
+
+    <script>
+        //实现图片的实时更新
+        if (typeof FileReader == 'undefined') {
+            document.getElementById("xmTanDiv").InnerHTML = "<h1>当前浏览器不支持FileReader接口</h1>";
+            document.getElementById("xdaTanFileImg").setAttribute("disabled", "disabled");
+        }
+        //选择图片，马上预览
+        function xmTanUploadImg(obj) {
+            let file = obj.files[0];
+            console.log(obj);console.log(file);
+            console.log("file.size = " + file.size);
+            let reader = new FileReader();
+            reader.onloadstart = function (e) {
+                console.log("开始读取....");
+            }
+            reader.onprogress = function (e) {
+                console.log("正在读取中....");
+            }
+            reader.onabort = function (e) {
+                console.log("中断读取....");
+            }
+            reader.onerror = function (e) {
+                console.log("读取异常....");
+            }
+            reader.onload = function (e) {
+                console.log("成功读取....");
+                let img = document.getElementById("avarimgs");
+                img.src = e.target.result;
+                //或者 img.src = this.result;  //e.target == this
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
+</html>

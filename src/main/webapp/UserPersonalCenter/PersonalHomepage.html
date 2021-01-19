@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心首页</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../static/css/HoriZontalCenterTable.css">
+    <style>
+        #top{
+            width: 100%;
+            height: 70px;
+            text-align: center;
+        }
+        a {
+            padding-top: 50px;
+            margin-left: 60px;
+        }
+    </style>
+    <script>
+        $(function () {
+            show();
+        })
+
+        function show(){
+            $.ajax({
+                url:"/Book/personalhomepage?op=find",
+                type: "post",
+                dataType: "json",
+                sync: false,
+                success:function (map) {
+                    $("#number").text(map.number);
+                    $("#rmb").text(map.he);
+                    $("#q2").text(map.STATU1);
+                    $("#q3").text(map.STATU2);
+                    myorderpage();
+                }
+            })
+        }
+
+        //查询特定状态的件数
+        // function findBystate(ostatus) {
+        //     $.ajax({
+        //         url:"/Book/personalhomepage?op=findBystate&ostatus="+ostatus,
+        //         type:"post",
+        //         dataType:"json",
+        //         sync:true,
+        //         success:function (integer) {
+        //             if(ostatus=="待付款"){
+        //                 $("#q2").text(integer);
+        //             }else if(ostatus=="已发货"){
+        //                 $("#q3").text(integer);
+        //             }
+        //         }
+        //     })
+        // }
+    </script>
+
+</head>
+<body>
+        <h2 id="top">您好!<span id="uname"></span>欢迎回来</h2>
+
+        <div class="pull-left col-lg-2">
+        <h3 style="margin:-20px 0 20px 50px">用户信息</h3>
+        <img src="/Book/img/1.jpg" class="img-rounded" alt=""/>
+        <br/>
+        <h4><a href="/Book/UserPersonalCenter/UserModifiesAvatar.html" >修改头像</a></h4>
+        </div>
+
+        <div class="pull-left col-lg-10" style="margin-left: 50px;" >
+            <h4>您的订单交易总数量:&nbsp;<span id="number"></span>件&nbsp;&nbsp;
+            <a target="frame2"  href="/Book/UserPersonalCenter/ShoppingPage/MyOrderPage.html">进入订单列表</a></h4>
+            <br/>
+            <h4>总消费金额:&nbsp;¥<span id="rmb"></span></h4>
+            <br/><br/>
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <div>
+                        <p class="navbar-text">待付款订单:<span id="q2"></span>件 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                    </div>
+
+                    <div>
+                        <p class="navbar-text"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;待确认收货:<span id="q3"></span>件</p>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <table class="table table-hover table-bordered">
+            <caption><h4>我的订单</h4></caption>
+            <thead>
+            <tr>
+                <th>订单编号</th>
+                <th>下单日期</th>
+                <th>收货人</th>
+                <th>支付方式</th>
+                <th>总金额</th>
+                <th>订单状态</th>
+            </tr>
+            </thead>
+            <tbody id="tbody6">
+            <tr>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <a class="pull-right" target="frame2"  href="/Book/UserPersonalCenter/ShoppingPage/MyOrderPage.html">更多订单</a>
+</body>
+
+    <script>
+        //展示订单
+        function myorderpage() {
+            $.ajax({
+                url:"/Book/myorderpage?op=findByMore",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        if (i < 4){
+                            html +="<tr>"+
+                                "<td>"+q.onumbers+"</td>"+
+                                "<td>"+q.ordertime+"</td>"+
+                                "<td>"+q.user.uname+"</td>"+
+                                "<td>支付宝</td>"+
+                                "<td>"+q.omoney+"</td>"+
+                                "<td>"+q.ostatus+"</td>"+
+                                "</tr>";
+                        }
+                    }
+                    $("#tbody6").html(html);
+                }
+            })
+        }
+    </script>
+</html>

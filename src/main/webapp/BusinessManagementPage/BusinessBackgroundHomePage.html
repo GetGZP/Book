@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商城后台首页</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <style>
+        #img1{
+            margin: 15px 50px;
+            width: 100px;
+        }
+        #left{
+            background-color: whitesmoke;
+            height: 725px;
+        }
+        #right{
+            height: 725px;
+        }
+        #left li{
+            margin: 30px 0;
+        }
+    </style>
+
+    <script>
+        //页面加载完成执行
+        $(function () {
+            show();
+        })
+
+        //查询用户的相关信息
+        function show() {
+            $.ajax({
+                url:"/Book/adminuserhomeservlet?op=findMore",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (adminuser) {
+                    if(adminuser != null){
+                        $("#img").prop("src",adminuser.path);
+                        $("#img1").prop("src",adminuser.path);
+                        $("#p1").text(adminuser.auser);
+                        $("#admin").text(adminuser.auser);
+                    }
+                }
+            })
+        }
+
+        //注销
+        function remove() {
+            $.ajax({
+                url: "/Book/adminuserhomeservlet?op=remove",
+                type: "post",
+                dataType: "json",
+                sync: false,
+            })
+        }
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/Book/BusinessManagementPage/BusinessBackgroundHomePage.html" style="margin-left: 20px;">商城后台</a>
+        </div>
+        <div>
+            <!--向右对齐-->
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="p1">
+                        Java <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/Book/BusinessManagementPage/MerchantLoginPage.html" onclick="remove()">注销</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <p class="navbar-text navbar-right">
+                <img src="" alt="" style="width: 20px" id="img"/>
+            </p>
+        </div>
+    </div>
+</nav>
+
+    <div class="col-lg-2 text-center" id="left">
+        <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1606760290436&di=28a02000a502511693f099721568005a&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201809%2F01%2F20180901190625_wmpeq.thumb.700_0.jpeg" class="img-circle" alt="" id="img1"/>
+        <span>你好!,欢迎<span id="admin"></span>登陆</span>
+        <ul class="list-group" id="u">
+            <li class="list-group-item meun-item" ><a target="frame" href=""><span class="glyphicon glyphicon-home"></span>&nbsp;后台首页</a></li>
+            <li class="list-group-item meun-item" ><a target="frame" href="/Book/BusinessManagementPage/BookTableMerchants.html"><span class="glyphicon glyphicon-list-alt"></span>&nbsp;类别管理</a></li>
+            <li class="list-group-item meun-item" ><a target="frame" href="/Book/BusinessManagementPage/BookMerchants.html"><span class="glyphicon glyphicon-align-justify"></span>&nbsp;商品列表</a></li>
+            <li class="list-group-item meun-item" ><a target="frame" href="/Book/BusinessManagementPage/BusinessOrderManagementPage.html"><span class="glyphicon glyphicon-sound-dolby"></span>&nbsp;订单列表</a></li>
+        </ul>
+    </div>
+
+    <div class="col-lg-10" id="right">
+        <iframe  height="100%" width="100%" name="frame" src="" style="border-style: none"></iframe>
+    </div>
+
+</body>
+</html>

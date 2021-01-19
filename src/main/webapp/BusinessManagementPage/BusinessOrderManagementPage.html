@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商家订单管理页面</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../static/css/HoriZontalCenterTable.css">
+</head>
+    <script>
+
+        $(function () {
+            myorderpage("/Book/myorderpage?op=findByMore&II=guan");
+        })
+
+        //展示订单
+        function myorderpage(url) {
+            $.ajax({
+                url:url,
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html +="<tr>"+
+                            "<td><input type='checkbox' class='c'/></td>"+
+                            "<td>"+q.onumbers+"</td>"+
+                            "<td>"+q.ordertime+"</td>"+
+                            "<td>"+q.user.uname+"</td>"+
+                            "<td>"+q.address.adname+"</td>"+
+                            "<td>"+q.address.adphone+"</td>"+
+                            "<td>"+q.address.adress+"</td>"+
+                            "<td>"+q.omoney+"</td>"+
+                            "<td>"+q.ostatus+"</td>"+
+                            "<td>" +
+                            "<input type='button' class='btn btn-primary'  data-toggle= 'modal' data-target= '#myModal' onclick='showmodai("+q.onumbers+")' value='查看'/>";
+                        if(q.ostatus == "待发货") {
+                            html += "<button type='button' class='btn btn-danger' onclick='fukuan("+q.onumbers+")'>发货</button>";
+                        }
+                        html += "</td>"+
+                            "</tr>";
+                    }
+                    $("#tbody").html(html);
+                }
+            })
+        }
+
+        //模糊查询
+        function finBYALLS() {
+          let onumbers = $("#p3").val();
+            myorderpage("/Book/myorderpage?op=findByMore1&II=guan&onumbers="+onumbers);
+        }
+
+        //修改订单状态为已发货
+        function fukuan(onumbers) {
+            updateMore("已发货",onumbers);
+        }
+
+        //修改订单
+        function updateMore(ostatus,onumbers) {
+            $.ajax({
+                url: "/Book/myorderpage?op=updateMore&ostatus="+ostatus+"&onumbers="+onumbers,
+                type: "post",
+                dataType: "json",
+                sync: true,
+                success:function (b){
+                    if(b){
+                        myorderpage("/Book/myorderpage?op=findByMore&II=guan");
+                    }else {
+                        alert("修改失败!");
+                    }
+                }
+            })
+        }
+
+
+    </script>
+<body>
+
+<div id="p1">
+    <div style="padding: 100px 100px 10px;">
+        <form class="bs-example bs-example-form" role="form">
+            <div class="row">
+                <br>
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="订单编号" id="p3"/>
+                        <span class="input-group-btn">
+                        <input class="btn btn-default" type="button" value="搜索" onclick="finBYALLS()"/>
+                    </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+            </div><!-- /.row -->
+        </form>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <caption>订单列表</caption>
+    <thead>
+    <tr>
+        <th><input type="checkbox" class="c"/></th>
+        <th>订单编号</th>
+        <th>下单时间</th>
+        <th>用户账号</th>
+        <th>收货人</th>
+        <th>手机号码</th>
+        <th>收货地址</th>
+        <th>金额</th>
+        <th>订单状态</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    <tr>
+        <td>Tanmay</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="fom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">订单详情</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="p2">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>商品名称</th>
+                            <th>图片</th>
+                            <th>数量</th>
+                            <th>价格</th>
+                            <th>小计</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody2">
+                        <tr>
+                            <td>Tanmay</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-default" data-dismiss="modal" >关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal -->
+</div>
+
+</body>
+
+
+
+<script>
+    //关闭模态框后清除数据
+    $(function () {
+        $('#myModal').on('hide.bs.modal', function (e) {
+            $('#fom')[0].reset();
+            $("[name = avarimgs]").each(function () {
+                $(this).attr("src",'');
+            })
+        })
+    })
+
+    //展示模态框数据
+    function showmodai(onumbers) {
+        $.ajax({
+            url: "/Book/myorderpage?op=findByMores&onumbers=" + onumbers,
+            type: "post",
+            dataType: "json",
+            sync: true,
+            success: function (list) {
+                let html = "";
+                for (let i in list) {
+                    let q = list[i];
+                    html += "<tr>" +
+                        "<td>" + (i * 1 + 1) + "</td>" +
+                        "<td>" + q.book.bname + "</td>" +
+                        "<td><img src='" + q.book.path + "' alt='' name='avarimgs'></td>" +
+                        "<td>" + q.sonumber + "</td>" +
+                        "<td>" + q.book.bprice + "</td>" +
+                        "<td>" + q.sostotalprice + "</td>" +
+                        "</tr>"
+                }
+                $("#tbody2").html(html);
+            }
+        })
+    }
+</script>
+    <script>
+        //全选功能
+        $(function () {
+            $(".c:first").click(function () {
+                let f = $(".c:first").prop("checked");
+                $(".c:not(.c:first)").prop("checked",f);
+            })
+        })
+    </script>
+</html>

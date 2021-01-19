@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>书籍页面</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/HoriZontalCenterTable.css">
+    <style>
+        #hed{
+            padding: 15px 0 0 5px;
+            height: 50px;
+            width: 100%;
+            color: black;
+        }
+    </style>
+
+    <script>
+        $(function () {
+            show("/Book/bookservlet?op=findMore");
+            showType();
+        })
+
+        //关闭模态框后清除数据
+        $(function () {
+            $('#myModal').on('hide.bs.modal', function (e) {
+                $('#fom')[0].reset();
+                $("#avarimgs").attr("src",'');
+                $("#updatebdetails").text("");
+                $("#updatebstate1").attr("checked",false);
+                $("#updatebstate2").attr("checked",false);
+            })
+            $('#addmyModal').on('hide.bs.modal', function (e) {
+                $('#addfom')[0].reset();
+                $("#avarimgs2").attr("src",'');
+                $("#addbdetails").text("");
+                $("#addbstate1").attr("checked",false);
+                $("#addbstate2").attr("checked",false);
+            })
+        })
+
+            //展示页面数据
+            function show(url) {
+                $.ajax({
+                    url: url,
+                    type: "post",
+                    dataType: "json",
+                    sync: true,
+                    success: function (info) {
+                        let html = "";
+                        for (let i in info.list) {
+                            let q = info.list[i];
+                            html += "<tr>" +
+                                "<td>" + q.bid + "</td>" +
+                                "<td><input type='checkbox' value='" + q.bid + "' class='c' name='bid'/></td>" +
+                                "<td>" + q.bname + "</td>" +
+                                "<td>" + q.bookType.tname + "</td>" +
+                                "<td><img src='" + q.path + "' alt=''/> </td>" +
+                                "<td>" + q.binventory + "</td>" +
+                                "<td>" + q.bbaseprice + "</td>" +
+                                "<td>" + q.bprice + "</td>" +
+                                "<td>" + q.bpresstime + "</td>" +
+                                "<td>" + q.bstate + "</td>" +
+                                "<td>" +
+                                "<p>" +
+                                "<input type='button' class='btn btn-primary'  data-toggle= 'modal' data-target= '#myModal' onclick='findID(" + q.bid + ")' value='编辑'/>" +
+                                "<input type='button' class='btn btn-danger' onclick='shelves(" + q.bid + ")' value='下架'/>" +
+                                "</p>" +
+                                "</td>" +
+                                "</tr>";
+                        }
+                        $("tbody").html(html);
+                        let pagehtml = "";
+                        for (let i = 1; i <= info.navigatepageNums.length; i++) {
+                            pagehtml += "<li><a href='javascript:mohu(" + i + ")'>" + i + "</a></li>";
+                        }
+                        $(".pagination").html(pagehtml);
+                    }
+                })
+            }
+
+            //实现单击下架功能
+            function shelves(bid) {
+                let bstate = "已下架";
+                $.ajax({
+                    url: "/Book/bookservlet?op=upbstate&bid=" + bid + "&bstate=" + bstate,
+                    type: "post",
+                    dataType: "json",
+                    sync: true,
+                    success: function (b) {
+                        if (b) {
+                            show("/Book/bookservlet?op=findMore");
+                        } else {
+                            alert("下架失败!");
+                        }
+                    }
+                })
+            }
+
+            //批量下架功能
+            function shelveses() {
+                let bstate = "已下架";
+                let f1 = $("#xx").serialize();
+                $.ajax({
+                    url: "/Book/bookservlet?op=stateupdates",
+                    type: "post",
+                    dataType: "json",
+                    data: f1,
+                    sync: true,
+                    success: function (b) {
+                        if (b) {
+                            show("/Book/bookservlet?op=findMore");
+                        } else {
+                            alert("批量下架失败!");
+                        }
+                    }
+                })
+            }
+
+            //模糊查询
+            function mohu(i) {
+                let bname = $("#mobname").val();
+                let tname = $("#showbookType option:selected").val();
+                let url = "";
+                if (i == undefined) {
+                    url = "/Book/bookservlet?op=findMore&bname=" + bname + "&tname=" + tname;
+                } else {
+                    url = "/Book/bookservlet?op=findMore&bname=" + bname + "&tname=" + tname + "&pageNum=" + i;
+                }
+                show(url);
+            }
+
+
+    </script>
+
+
+</head>
+<body>
+
+<div id="hed">
+    <form id="fom2">
+    <label>
+        <input type="text" placeholder="商品名称" id="mobname" name="bname"/>
+    </label>
+    <label>
+        <select id="showbookType" name="tname">
+            <option>请选择</option>
+            <option></option>
+        </select>
+    </label>
+    <input type="button" onclick="mohu()" value="查询"/>
+    </form>
+</div>
+<form id="xx">
+<table class="table table-hover table-bordered">
+    <caption class="text-center"><h4>书籍列表</h4></caption>
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th><label>
+            <input type="checkbox" class="c" onclick="quanxuan()"/>
+        </label></th>
+        <th>商品名</th>
+        <th>类别</th>
+        <th>图片</th>
+        <th>库存</th>
+        <th>市场价</th>
+        <th>销售价</th>
+        <th>出版日期</th>
+        <th>状态</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <input type="button" class='btn btn-primary'  data-toggle= 'modal' data-target= '#addmyModal' onclick="xianshileixing()" value="添加商品"/>
+    <button  class="btn btn-danger" onclick="shelveses()">批量下架</button>
+</p>
+</form>
+<ul class="pagination">
+    <li><a href="#">&laquo;</a></li>
+    <li><a href="#">1</a></li>
+    <li><a href="#">2</a></li>
+    <li><a href="#">3</a></li>
+    <li><a href="#">4</a></li>
+    <li><a href="#">5</a></li>
+    <li><a href="#">&raquo;</a></li>
+</ul>
+
+
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <form  class="form-inline" role="form" id="fom">
+        <input type="hidden" id="id" name="updatebid"/>
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑图书信息</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group has-success show">
+                    <label>修改图片</label>
+                    <img src="" class="img-circle img-thumbnail img-responsive" id="avarimgs" alt="" />
+
+                    <div class="form-group">
+                        <label class="sr-only" for="xdaTanFileImg">图片输入</label>
+                        <input type="file" name="pclogo" id="xdaTanFileImg" onchange="xmTanUploadImg(this)">
+
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebname">图书名称:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebname" name="updatebname">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebnumbers">商品编号:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebnumbers" name="updatebnumbers">
+                    </div>
+                </div>
+                <br/><br/><br/>
+
+                <div class="form-group has-success show ">
+                    <label class="col-sm-2 control-label" for="updatestate">
+                        类别:
+                    </label>
+                    <select name="updatestate" id="updatestate" class="form-control ">
+                        <option></option>
+                    </select>
+                </div>
+                <br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebinventory">库存:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebinventory" name="updatebinventory">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebauthor">作者:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebauthor" name="updatebauthor">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebpress">出版社:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebpress" name="updatebpress">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebbaseprice">市场价:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebbaseprice" name="updatebbaseprice">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebprice">售价:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="updatebprice" name="updatebprice">
+                    </div>
+                </div>
+                <br/><br/>
+
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label" for="updatebdetails">商品描述:</label>
+                    <div class="col-sm-10">
+                        <textarea id="updatebdetails" class="form-control" rows="3" name="updatebdetails"></textarea>
+                    </div>
+                </div>
+                <br/><br/>
+
+                <h4 style="color: #5cb85c">书籍状态</h4>
+                <label class="radio-inline">
+                    <input type="radio" name="updatebstate" id="updatebstate1" value="正常" > 正常
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="updatebstate" id="updatebstate2"  value="已下架"> 已下架
+                </label>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="clear()">关闭</button>
+                <input type="button" class="btn btn-primary" data-dismiss="modal" value="提交更改" onclick="updateID()"/>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+    </form>
+</div>
+
+
+<!-- 新增模态框（Modal） -->
+<div class="modal fade" id="addmyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <form  class="form-inline" role="form" id="addfom">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="addmyModalLabel">新增图书信息</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group has-success show">
+                        <label>新增图片</label>
+                        <img src="" class="img-circle img-thumbnail img-responsive" id="avarimgs2" alt="" />
+
+                        <div class="form-group">
+                            <label class="sr-only" for="xdaTanFileImg2">图片输入</label>
+                            <input type="file" name="pclogo" id="xdaTanFileImg2" onchange="xmTanUploadImg2(this)">
+
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbname">图书名称:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbname" name="updatebname">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbnumbers">商品编号:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbnumbers" name="updatebnumbers">
+                        </div>
+                    </div>
+                    <br/><br/><br/>
+
+                    <div class="form-group has-success show ">
+                        <label class="col-sm-2 control-label" for="addstate">
+                            类别:
+                        </label>
+                        <select name="updatestate" id="addstate" class="form-control ">
+                            <option></option>
+                        </select>
+                    </div>
+                    <br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbinventory">库存:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbinventory" name="updatebinventory">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbauthor">作者:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbauthor" name="updatebauthor">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbpress">出版社:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbpress" name="updatebpress">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbbaseprice">市场价:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbbaseprice" name="updatebbaseprice">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbprice">售价:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addbprice" name="updatebprice">
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label" for="addbdetails">商品描述:</label>
+                        <div class="col-sm-10">
+                            <textarea id="addbdetails" class="form-control" rows="3" name="updatebdetails"></textarea>
+                        </div>
+                    </div>
+                    <br/><br/>
+
+                    <h4 style="color: #5cb85c">书籍状态</h4>
+                    <label class="radio-inline">
+                        <input type="radio" name="updatebstate2" id="addbstate1" value="正常" > 正常
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="updatebstate2" id="addbstate2"  value="已下架"> 已下架
+                    </label>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="clear()">关闭</button>
+                    <input type="button" class="btn btn-primary" data-dismiss="modal" value="提交更改" onclick="insertADD()"/>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </form>
+</div>
+
+</body>
+
+    <script>
+
+
+
+        //展示图书类型
+        function showType() {
+            $.ajax({
+                url: "/Book/booktype?op=findMore",
+                type: "post",
+                dataType: "json",
+                sync: true,
+                success: function (list) {
+                    let html = "<option>请选择</option>";
+                    for (let i in list) {
+                        let q = list[i];
+                        html += "<option value='"+q.tname+"'>" + q.tname + "</option>";
+                    }
+                    $("#showbookType").html(html);
+                }
+            })
+        }
+
+        //点击新增数据时展示的类型
+      function xianshileixing() {
+          $.ajax({
+              url: "/Book/booktype?op=findMore",
+              type: "post",
+              dataType: "json",
+              sync: true,
+              success: function (list) {
+                  let html = "";
+                  for (let i in list) {
+                      let q = list[i];
+                      html += "<option value='"+q.tid+"'>" + q.tname + "</option>";
+                  }
+                  $("#addstate").html(html);
+              }
+          })
+      }
+
+        //新增一条信息
+        function insertADD() {
+            let data = new FormData();
+            data.append("xdaTanFileImg",$("#xdaTanFileImg2").get(0).files[0]);
+            data.append("updatebname",$("#addbname").val());
+            data.append("updatebnumbers",$("#addbnumbers").val());
+            data.append("updatestate",$("#addstate option:selected").val());
+            data.append("updatebinventory",$("#addbinventory").val());
+            data.append("updatebauthor",$("#addbauthor").val());
+            data.append("updatebpress",$("#addbpress").val());
+            data.append("updatebprice",$("#addbprice").val());
+            data.append("updatebbaseprice",$("#addbbaseprice").val());
+            data.append("updatebdetails",$("#addbdetails").val());
+            data.append("updatebstate",$("input[name='updatebstate2']:checked").val());
+            $.ajax({
+                url:"/Book/bookservlet?op=insertADD",
+                type:"post",
+                contentType: false,
+                processData: false,
+                data:data,
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        show("/Book/bookservlet?op=findMore");
+                    }else {
+                        alert("新增失败!");
+                    }
+                }
+            })
+
+        }
+
+        //实现全选全不选
+        function quanxuan(){
+            $(".c:first").click(function () {
+                let f = $(".c:first").prop("checked");
+                $(".c:not(.c:first)").prop("checked",f);
+            })
+        }
+
+        //点击编辑按钮后,查询数据并放入模态框中
+        function findID(bid) {
+            $.ajax({
+                url:"/Book/bookservlet?op=findMore&bid="+bid,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (info) {
+                    var html = "";
+                    for (let i in info.list){
+                        let q = info.list[i];
+                        $("#id").val(q.bid);
+                        $("#avarimgs").prop("src",q.path);
+                        $("#updatebname").val(q.bname);
+                        $("#updatebnumbers").val(q.bnumbers);
+                        for (let w in info.list[0].bookTypeList){
+                            let a = info.list[0].bookTypeList[w];
+                            html += "<option "+(q.bookType.tname==a.tname?'selected':'')+" value='"+q.bookType.tid+"'>"+a.tname+"</option>";
+                        }
+                        $("#updatebinventory").val(q.binventory);
+                        $("#updatebauthor").val(q.bauthor);
+                        $("#updatebpress").val(q.bpress);
+                        $("#updatebprice").val(q.bprice)
+                        $("#updatebbaseprice").val(q.bbaseprice);
+                        $("#updatebdetails").text(q.bdetails);
+                        if(q.bstate=="正常"){
+                            $("#updatebstate1").attr("checked",true);
+                        }else if(q.bstate=="已下架"){
+                            $("#updatebstate2").attr("checked",true);
+                        }
+                    }
+                    $("#updatestate").html(html);
+                }
+            })
+        }
+
+        //修改一条数据以及图片
+        function updateID() {
+            let data = new FormData();
+            data.append("xdaTanFileImg",$("#xdaTanFileImg").get(0).files[0]);
+            data.append("id",$("#id").val());
+            data.append("updatebname",$("#updatebname").val());
+            data.append("updatebnumbers",$("#updatebnumbers").val());
+            data.append("updatestate",$("#updatestate option:selected").text());
+            data.append("updatebinventory",$("#updatebinventory").val());
+            data.append("updatebauthor",$("#updatebauthor").val());
+            data.append("updatebpress",$("#updatebpress").val());
+            data.append("updatebprice",$("#updatebprice").val());
+            data.append("updatebbaseprice",$("#updatebbaseprice").val());
+            data.append("updatebdetails",$("#updatebdetails").val());
+            data.append("updatebstate",$("input[name='updatebstate']:checked").val());
+            $.ajax({
+                url:"/Book/bookservlet?op=updateID",
+                type:"post",
+                contentType: false,
+                processData: false,
+                data:data,
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        show("/Book/bookservlet?op=findMore");
+                    }else {
+                        alert("修改失败!");
+                    }
+                }
+            })
+        }
+    </script>
+
+
+
+<script type="text/javascript">
+    //实现图片的实时更新
+    if (typeof FileReader == 'undefined') {
+        document.getElementById("xmTanDiv").InnerHTML = "<h1>当前浏览器不支持FileReader接口</h1>";
+        document.getElementById("xdaTanFileImg").setAttribute("disabled", "disabled");
+    }
+    //选择图片，马上预览
+    function xmTanUploadImg(obj) {
+        let file = obj.files[0];
+        console.log(obj);console.log(file);
+        console.log("file.size = " + file.size);
+        let reader = new FileReader();
+        reader.onloadstart = function (e) {
+            console.log("开始读取....");
+        }
+        reader.onprogress = function (e) {
+            console.log("正在读取中....");
+        }
+        reader.onabort = function (e) {
+            console.log("中断读取....");
+        }
+        reader.onerror = function (e) {
+            console.log("读取异常....");
+        }
+        reader.onload = function (e) {
+            console.log("成功读取....");
+            let img = document.getElementById("avarimgs");
+            img.src = e.target.result;
+            //或者 img.src = this.result;  //e.target == this
+        }
+        reader.readAsDataURL(file);
+    }
+
+    //实现图片的实时更新
+    if (typeof FileReader == 'undefined') {
+        document.getElementById("xmTanDiv").InnerHTML = "<h1>当前浏览器不支持FileReader接口</h1>";
+        document.getElementById("xdaTanFileImg2").setAttribute("disabled", "disabled");
+    }
+    //选择图片，马上预览
+    function xmTanUploadImg2(obj) {
+        let file = obj.files[0];
+        console.log(obj);console.log(file);
+        console.log("file.size = " + file.size);
+        let reader = new FileReader();
+        reader.onloadstart = function (e) {
+            console.log("开始读取....");
+        }
+        reader.onprogress = function (e) {
+            console.log("正在读取中....");
+        }
+        reader.onabort = function (e) {
+            console.log("中断读取....");
+        }
+        reader.onerror = function (e) {
+            console.log("读取异常....");
+        }
+        reader.onload = function (e) {
+            console.log("成功读取....");
+            let img = document.getElementById("avarimgs2");
+            img.src = e.target.result;
+            //或者 img.src = this.result;  //e.target == this
+        }
+        reader.readAsDataURL(file);
+    }
+</script>
+
+</html>

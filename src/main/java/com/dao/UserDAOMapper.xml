@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.UserDAOMapper">
+
+    <resultMap id="ma" type="user">
+        <id property="uid" column="uid"/>
+        <result property="uname" column="uname"/>
+        <result property="uemail" column="uemail"/>
+        <result property="uphoto" column="uphoto"/>
+        <association property="address" javaType="address">
+            <id column="adid" property="adid"/>
+            <result column="adname" property="adname"/>
+            <result column="adphone" property="adphone"/>
+            <result column="adress" property="adress"/>
+        </association>
+    </resultMap>
+
+    <select id="findMore" resultType="user" parameterType="user">
+        select  uid, uname, upsw, uemail, uphoto, adid
+        from user
+        <where>
+            <if test="uid>0">
+                and user.uid=#{uid}
+            </if>
+            <if test="uname!=null and uname!=''">
+                and uname=#{uname}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertADD" parameterType="user">
+        insert into user
+        (uname, upsw, uemail, uphoto)
+        value
+        (#{uname},#{upsw},#{uemail},#{uphoto})
+    </insert>
+
+    <update id="updateUser" parameterType="user">
+        update user
+        <set>
+            <if test="uname!=null and uname!=''">
+                ,uname=#{uname}
+            </if>
+            <if test="upsw!=null and upsw!=''">
+                ,upsw=#{upsw}
+            </if>
+            <if test="uemail!=null and uemail!=''">
+                ,uemail=#{uemail}
+            </if>
+            <if test="uphoto!=null and uphoto!=''">
+                ,uphoto=#{uphoto}
+            </if>
+            <if test="address.adid>0">
+                ,adid=#{address.adid}
+            </if>
+            where uid=#{uid}
+        </set>
+    </update>
+
+</mapper>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>订单支付页面</title>
+    <script src="../../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../../boot&jquery/css/bootstrap.css">
+    <style>
+        #ok{
+            position: fixed;
+            z-index: 100;
+            margin-left: 170px;
+            margin-top: 35px;
+        }
+        h3{
+            width: 100%;
+        }
+    </style>
+
+    <script>
+
+        $(function () {
+            show();
+        })
+
+        //显示订单
+        function show() {
+          let url = location.href;
+          let a = url.split("?")[1];
+          let Onumbers = a.split("=")[1];
+
+          $.ajax({
+              url:"/Book/orderpayment?op=findByMore&Onumbers="+Onumbers,
+              type:"post",
+              dataType:"json",
+              sync:false,
+              success:function (list) {
+                  let q = list[0];
+                  $("#q1").text(q.onumbers);
+                  $("#q2").text(q.omoney);
+                  $("#q3").text("支付宝");
+              }
+          })
+        }
+
+    </script>
+
+</head>
+<body>
+<span class="glyphicon glyphicon-ok" style="color: #799C42; font-size: 50px;" id="ok">订单已提交</span>
+<div class="container text-center center-block" style="margin-top: 100px; background-color: #FAFAFA;">
+    <div class="jumbotron" style="background-color: #FAFAFA;">
+        <h2 style="margin-bottom: 50px">订单信息</h2>
+        <div class="col-lg-12 text-left" style="background-color: white">
+            <h3 >订单编号:&nbsp;<span style="color: #dca7a7;" id="q1"></span></h3>
+            <h3 >订单金额:&nbsp;¥<span style="color: #dca7a7;" id="q2"></span></h3>
+            <h3 >支付方式:&nbsp;<span style="color: #dca7a7;" id="q3"></span></h3>
+        </div>
+        <br/>
+        <p class="center-block col-lg-12" style="margin-top: 50px">
+            <button type="button" class="btn btn-primary btn-lg" onclick="updateMore()">立即支付</button>
+        </p>
+    </div>
+</div>
+
+</body>
+
+    <script>
+
+        //支付订单
+        function updateMore(){
+           let Onumbers2 = $("#q1").text();
+            $.ajax({
+                url:"/Book/orderpayment?op=updateMore&Onumbers="+Onumbers2,
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (b) {
+                    if(b){
+                        window.location.href = location.origin+"/Book/UserPersonalCenter/PersonalCenter.html?MyOrderPage";
+                    }else {
+                        alert("支付失败!");
+                    }
+                }
+            })
+        }
+    </script>
+</html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.AdminuserDAOMapper">
+    <resultMap id="a" type="adminuser">
+        <id column="aid" property="aid"/>
+        <result column="auser" property="auser"/>
+        <result column="apsw" property="apsw"/>
+        <result column="path" property="path"/>
+    </resultMap>
+
+    <select id="findMore" resultMap="a">
+        select aid, auser, apsw, path
+        from adminuser
+        <if test="auser!=null and auser!=''">
+            where auser=#{auser}
+        </if>
+    </select>
+
+
+</mapper>

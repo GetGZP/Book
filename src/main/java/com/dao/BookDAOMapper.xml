@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.BookDAOMapper">
+    <resultMap id="books" type="book">
+        <id column="bid" property="bid"/>
+        <result column="bname" property="bname"/>
+        <result column="bauthor" property="bauthor"/>
+        <result column="binventory" property="binventory"/>
+        <result column="bbaseprice" property="bbaseprice"/>
+        <result column="bprice" property="bprice"/>
+        <result column="bstate" property="bstate"/>
+        <result column="bnumbers" property="bnumbers"/>
+        <result column="bpress" property="bpress"/>
+        <result column="bpresstime" property="bpresstime"/>
+        <result column="bdetails" property="bdetails"/>
+        <result column="path" property="path"/>
+        <association property="bookType" javaType="bookType">
+            <id column="tid" property="tid"/>
+            <result column="tname" property="tname"/>
+            <result column="tstate" property="tstate"/>
+        </association>
+    </resultMap>
+
+    <select id="findMore" resultMap="books" parameterType="book">
+        select bid, bname, bauthor, binventory, bbaseprice, bprice, bstate, bnumbers, bpress, bpresstime, bdetails,path, book.tid, tname, tstate
+        from book
+        left join booktype b on b.tid = book.tid
+        <where>
+            <if test="bname!=null and bname!=''">
+                and bname like #{bname}
+            </if>
+            <if test="bookType.tname!=null and bookType.tname!='' and bookType.tname!='请选择'">
+                and tname=#{bookType.tname}
+            </if>
+            <if test="bid!=0">
+                and bid=#{bid}
+            </if>
+            <if test="bstate!=null and bstate!=''">
+                and bstate=#{bstate}
+            </if>
+            <if test="bookType.tid>0">
+                and book.tid = #{bookType.tid}
+            </if>
+        </where>
+    </select>
+    
+    <select id="findegroup" resultMap="books">
+        select bid, bname, bauthor, binventory, bbaseprice, bprice, bstate, bnumbers, bpress, bpresstime, bdetails,path, tid
+        from book
+        where bstate = '正常'
+        group by binventory
+    </select>
+
+    <update id="updateID" parameterType="book">
+        update book
+        <set>
+            <if test="bname!=null and bname!=''">
+                ,bname=#{bname}
+            </if>
+            <if test="bauthor!=null and bauthor!=''">
+                ,bauthor=#{bauthor}
+            </if>
+            <if test="binventory!=0">
+                ,binventory=#{binventory}
+            </if>
+            <if test="bbaseprice!=0">
+                ,bbaseprice=#{bbaseprice}
+            </if>
+            <if test="bprice!=0">
+                ,bprice=#{bprice}
+            </if>
+            <if test="bstate!=null and bstate!=''">
+                ,bstate=#{bstate}
+            </if>
+            <if test="bnumbers!=0">
+                ,bnumbers=#{bnumbers}
+            </if>
+            <if test="bpress!=null and bpress!=''">
+                ,bpress=#{bpress}
+            </if>
+                ,bpresstime=#{bpresstime}
+            <if test="bdetails!=null and bdetails!=''">
+                ,bdetails=#{bdetails}
+            </if>
+            <if test="path!=null and path!=''">
+                ,path=#{path}
+            </if>
+            where bid=#{bid}
+        </set>
+    </update>
+
+    <update id="upbstate" parameterType="book">
+        update book
+        set bstate=#{bstate}
+        where bid=#{bid}
+    </update>
+
+    <insert id="insertADD" parameterType="book">
+        insert into
+        book(bid, bname, bauthor, binventory, bbaseprice, bprice, bstate, bnumbers, bpress, bpresstime, bdetails, tid, path)
+        value
+        (#{bid},#{bname},#{bauthor},#{binventory},#{bbaseprice},#{bprice},#{bstate},#{bnumbers},#{bpress},#{bpresstime},#{bdetails},#{bookType.tid},#{path})
+    </insert>
+
+    <update id="stateupdates" >
+        update book
+        set bstate=#{bstate}
+        where bid in
+        <foreach collection="bid" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

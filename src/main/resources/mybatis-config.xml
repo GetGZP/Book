@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 这是主配置文件约束：configuration -->
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--包裹所有配置标签,是整个配置文件的顶级标签-->
+<configuration>
+
+    <!--引入配置JDBC文件-->
+    <properties resource="db.properties"/>
+
+    <!--修改配置会影响底层运行-->
+    <!-- 全局配置参数，需要时再设置 -->
+    <settings>
+
+        <!-- 打印查询语句 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+
+        <!-- 全局延迟加载 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+
+            <!-- 开启二级缓存  默认值为true -->
+<!--            <setting name="cacheEnabled" value="true"/>-->
+
+    </settings>
+    <!--包裹标签-->
+    <typeAliases>
+        <!--配置类名简写-->
+        <typeAlias type="com.entity.Address" alias="address"/>
+        <typeAlias type="com.entity.Adminuser" alias="adminuser"/>
+        <typeAlias type="com.entity.Book" alias="book"/>
+        <typeAlias type="com.entity.BookType" alias="booktype"/>
+        <typeAlias type="com.entity.User" alias="user"/>
+        <typeAlias type="com.entity.BaseArea" alias="basearea"/>
+        <typeAlias type="com.entity.ShoppingCar" alias="shoppingcar"/>
+        <typeAlias type="com.entity.OrderList" alias="orderlist"/>
+        <typeAlias type="com.entity.ShopOrderTable" alias="shopordertable"/>
+    </typeAliases>
+
+    <!--配置分页的模板-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!-- 设置数据库类型 Oracle,Mysql,MariaDB,SQLite,Hsqldb,PostgreSQL六种数据库-->
+            <property name="helperDialect" value="mysql"/>
+        </plugin>
+    </plugins>
+
+    <!-- 配置当前环境 -->
+    <environments default="development">
+
+        <!-- 配置其中的一种环境 -->
+        <environment id="development">
+            <!--
+               配置事务管理器
+               type="JDBC" JDBC的事务处理
+            -->
+            <transactionManager type="JDBC"/>
+            <!--
+               配置数据源
+               type="POOLED"
+            -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--
+       配置mapper.xml
+      -->
+    <mappers>
+        <mapper resource="com/dao/AddressDAOMapper.xml"/>
+        <mapper resource="com/dao/AdminuserDAOMapper.xml"/>
+        <mapper resource="com/dao/BookDAOMapper.xml"/>
+        <mapper resource="com/dao/BookTypeDAOMapper.xml"/>
+        <mapper resource="com/dao/UserDAOMapper.xml"/>
+        <mapper resource="com/dao/BaseAreaDAOMapper.xml"/>
+        <mapper resource="com/dao/ShoppingCarDAOMapper.xml"/>
+        <mapper resource="com/dao/OrderListDAOMapper.xml"/>
+        <mapper resource="com/dao/ShopOrderTableDAOMapper.xml"/>
+    </mappers>
+
+</configuration>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.ShoppingCarDAOMapper">
+
+    <resultMap id="car" type="ShoppingCar">
+        <id property="sid" column="sid"/>
+        <result property="snumber" column="snumber"/>
+        <result property="stotalprice" column="stotalprice"/>
+        <association property="book" javaType="book">
+            <id column="bid" property="bid"/>
+            <result column="bname" property="bname"/>
+            <result column="bauthor" property="bauthor"/>
+            <result column="binventory" property="binventory"/>
+            <result column="bbaseprice" property="bbaseprice"/>
+            <result column="bprice" property="bprice"/>
+            <result column="bstate" property="bstate"/>
+            <result column="bnumbers" property="bnumbers"/>
+            <result column="bpress" property="bpress"/>
+            <result column="bpresstime" property="bpresstime"/>
+            <result column="bdetails" property="bdetails"/>
+            <result column="path" property="path"/>
+        </association>
+        <association property="user" javaType="user">
+            <id column="uid" property="uid"/>
+            <result column="uname" property="uname"/>
+            <result column="upsw" property="upsw"/>
+            <result column="uemail" property="uemail"/>
+            <result column="uphoto" property="uphoto"/>
+        </association>
+    </resultMap>
+
+    <select id="findMore" resultMap="car" parameterType="shoppingcar">
+        select sid, shoppingcar.bid, snumber, stotalprice, uid, bname, bauthor, binventory, bbaseprice, bprice, bstate, bnumbers, bpress, bpresstime, bdetails, path
+        from shoppingcar
+        left join book b on b.bid = shoppingcar.bid
+        <where>
+            <if test="user.uid > 0">
+                and uid = #{user.uid}
+            </if>
+            <if test="book.bid > 0">
+                and shoppingcar.bid = #{book.bid}
+            </if>
+        </where>
+    </select>
+
+    <select id="findNumber" parameterType="int" resultType="java.lang.Integer">
+        select ifnull(count(1),0)
+        from shoppingcar
+        where uid = #{uid}
+    </select>
+
+    <select id="findBySid" parameterType="java.util.Arrays" resultMap="car">
+        select sid, bid, snumber, stotalprice, uid
+        from shoppingcar
+        where sid in
+        <foreach collection="array"  item="sid" open="(" separator="," close=")">
+            #{sid}
+        </foreach>
+    </select>
+
+    <!--suppress SqlWithoutWhere -->
+    <delete id="deleteCar" parameterType="shoppingcar">
+        delete from shoppingcar 
+        <where>
+            and uid = #{user.uid}
+            <if test="book.bid > 0">
+                and bid = #{book.bid}
+            </if>
+            <if test="sid > 0">
+                and sid = #{sid}
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteCares" parameterType="java.util.Arrays">
+        delete from shoppingcar
+        where sid in
+        <foreach collection="array" item="sid" open="(" separator="," close=")">
+            #{sid}
+        </foreach>
+    </delete>
+
+    <update id="updateCar" parameterType="shoppingcar">
+        update shoppingcar
+        <set>
+            <if test="snumber > 0">
+                snumber = #{snumber},
+            </if>
+            <if test="stotalprice >0">
+                stotalprice = #{stotalprice},
+            </if>
+        </set>
+            <where>
+                and uid = #{user.uid}
+                and bid = #{book.bid}
+            </where>
+    </update>
+
+    <insert id="ADDCar" parameterType="shoppingcar">
+        insert into shoppingcar
+        (sid, bid, snumber, stotalprice, uid) VALUE
+        (#{sid},#{book.bid},#{snumber},#{stotalprice},#{user.uid})
+    </insert>
+
+    <select id="ADD"  resultType="java.lang.Integer">
+        select sid
+        from shoppingcar
+        order by sid desc
+        limit 0,1
+    </select>
+
+
+
+</mapper>

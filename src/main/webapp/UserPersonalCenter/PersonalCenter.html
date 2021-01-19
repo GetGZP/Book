@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户个人中心</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+
+    <style>
+        #left{
+            background-color: whitesmoke;
+            height: 725px;
+        }
+        #right{
+            height: 725px;
+        }
+        #left li{
+            margin: 30px 0;
+        }
+    </style>
+
+    <script>
+        $(function () {
+            show();
+        })
+
+        //判断显示哪个页面
+        function show(){
+            let url = location.href;
+            let q = url.split("?")[1];
+            if(q == "MyOrderPage"){
+                $("[name = frame2]").prop("src","/Book/UserPersonalCenter/ShoppingPage/MyOrderPage.html");
+            }
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="col-lg-2 text-center" id="left">
+        <h3><span class="glyphicon glyphicon-home"></span><a target="frame2" href="/Book/UserPersonalCenter/PersonalHomepage.html">会员中心</a></h3>
+        <ul class="list-group" id="u">
+            <li class="list-group-item meun-item" ><a target="frame2" href="/Book/UserPersonalCenter/ShoppingPage/MyOrderPage.html"><span class="glyphicon glyphicon-home"></span>&nbsp;我的订单</a></li>
+            <li class="list-group-item meun-item" ><a target="frame2" href="/Book/UserPersonalCenter/ShoppingPage/AddressManagementPage.html"><span class="glyphicon glyphicon-list-alt"></span>&nbsp;地址管理</a></li>
+            <li class="list-group-item meun-item" ><a target="frame2" href="/Book/UserPersonalCenter/UserModifiesAvatar.html"><span class="glyphicon glyphicon-align-justify"></span>&nbsp;修改头像</a></li>
+            <li class="list-group-item meun-item" ><a target="frame2" href="/Book/UserPersonalCenter/ChangePasswordPage.html"><span class="glyphicon glyphicon-sound-dolby"></span>修改密码</a></li>
+        </ul>
+    </div>
+
+    <div class="col-lg-10" id="right">
+        <iframe  height="100%" width="100%" name="frame2" src="/Book/UserPersonalCenter/PersonalHomepage.html" style="border-style: none"></iframe>
+    </div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>书籍详情展示</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <script src="../boot&jquery/js/npm.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap-theme.css">
+    <style>
+        img{
+            margin-right: 20px;
+        }
+    </style>
+    <script>
+        //页面加载完毕执行的操作
+        $(function () {
+            show();
+        })
+
+        //展示书籍详情
+        function show() {
+            let url = location.href;
+            let bid = url.split("?")[1];
+            $.ajax({
+                url:"/Book/bookshow?op=findMore&"+bid,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html+=
+                            "<img src='"+q.path+"' class='img-rounded' align='left' id='img' alt=''>"+
+                            "<h1>"+q.bname+"</h1>"+
+                            "<h5>销售价:¥"+q.bprice+"</h5>"+
+                            "<h5>作者:"+q.bauthor+"</h5>"+
+                            "<h5>出版社:"+q.bpress+"</h5>"+
+                            "<h5>出版时间:"+q.bpresstime+"</h5>"+
+                            "<h5>库存:"+q.binventory+"件</h5>"+
+                            "<p>" +
+                            "<input type='button' class='btn btn-danger' onclick='goumai("+q.bid+","+q.bprice+")' value='立即购买'/>"+
+                            "<button id = 'o3' class='btn btn-primary' onclick='ADDCar("+q.bid+","+q.bprice+")'>加入购物车</button>"+
+                            "</p>"
+                    }
+                    $(".container").html(html);
+                }
+            })
+        }
+
+        //立即购买
+        function goumai(bid,bprice) {
+            $.ajax({
+                url:"/Book/bookdetailsdisplay?op=ADD&bprice="+bprice+"&bid="+bid,
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (sid) {
+                    if(sid != 0){
+                        $.ajax({
+                            url:"/Book/shoppingcar?op=findADDOrder&omoney="+bprice+"&sid="+sid,
+                            type:"post",
+                            dataType:"json",
+                            sync:false,
+                            success:function (Onumbers) {
+                                if (Onumbers==null){
+                                    window.location.href=location.origin+"/Book/UserPersonalCenter/UserloginPage.html";
+                                }
+                                window.location.href=location.origin+"/Book/UserPersonalCenter/ShoppingPage/CheckTheOrderInformationPage.html?Onumbers="+Onumbers+"&omoney="+bprice;
+                            }
+                        })
+                    }
+                    else {
+                        window.location.href=location.origin+"/Book/UserPersonalCenter/UserloginPage.html";
+                    }
+
+                }
+            })
+
+        }
+
+
+        //添加一条购物车信息
+        function ADDCar(bid,bprice) {
+            $.ajax({
+                url:"/Book/shoppingcar?op=ADDCar&bid="+bid+"&bprice="+bprice,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        parent.findNumber();
+                    }else {
+                        window.location.href=location.origin+"/Book/UserPersonalCenter/UserloginPage.html";
+                    }
+                }
+            })
+        }
+
+    </script>
+</head>
+<body>
+<div class="jumbotron">
+    <div class="container" >
+        <h1>欢迎登陆页面！</h1>
+        <p>这是一个超大屏幕（Jumbotron）的实例。</p>
+        <p><a class="btn btn-primary btn-lg" role="button">
+            学习更多</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

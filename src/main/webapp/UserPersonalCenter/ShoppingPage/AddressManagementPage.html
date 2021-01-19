@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>地址管理</title>
+    <script src="../../boot&jquery/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="../../boot&jquery/css/bootstrap.css">
+    <script src="../../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../../static/css/HoriZontalCenterTable.css">
+</head>
+    <style>
+        #op1{
+            margin: 0 10px 0 15px;
+        }
+        #op2{
+            margin-right: 10px;
+        }
+    </style>
+
+    <script>
+        //页面加载完成时执行
+        $(function () {
+            findMore();
+            findProvince();
+        })
+        
+        //查询地址
+        function findMore() {
+            $.ajax({
+                url:"/Book/address?op=findMore",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                            html+="<tr>" +
+                                "<td>"+q.adname+"</td>"+
+                                "<td>"+q.adphone+"</td>"+
+                                "<td>"+q.adress+"</td>"+
+                                "<td>"+
+                                "<p>"+
+                                "<input type='button' class='btn btn-primary' data-toggle= 'modal' data-target= '#updatetype' onclick='upfindMore("+q.adid+")' value='编辑'/>"+
+                                "<input type='button' class='btn btn-danger' onclick='deleteID("+q.adid+")' value='删除'/>"+
+                                "</p>"+
+                                "</td>"+
+                                "</tr>";
+                    }
+                    $("tbody").html(html);
+                }
+            })
+        }
+
+        //删除单条数据
+        function deleteID(adid) {
+            $.ajax({
+                url:"/Book/address?op=deleteID&adid="+adid,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        findMore();
+                    }else {
+                        alert("删除失败!");
+                    }
+                }
+            })
+        }
+
+        //点击编辑按钮时上传数据
+        function upfindMore(adid){
+            $.ajax({
+                url:"/Book/address?op=findMore&adid="+adid,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (list) {
+                    let q = list[0];
+                    $("#upadid").val(q.adid);
+                    $("#upadname").val(q.adname);
+                    $("#upadphone").val(q.adphone);
+                    $("#upadress").val(q.adress);
+                }
+            })
+        }
+
+        //查询省
+        function findProvince() {
+            $.ajax({
+                url:"/Book/basearea?op=findProvince",
+                type:"post",
+                dataType:"json",
+                sync:false,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list){
+                        let q = list[i];
+                        html+="<option value='"+q.base_areaid+"'>"+q.name+"</option>";
+                    }
+                    $("#op1").html(html);
+                    findCity();
+                }
+            })
+
+        }
+
+        //查询市
+        function findCity() {
+           let city = $("#op1").find("option:selected").val();
+           let url = "/Book/basearea?op=findCity&city="+city;
+            $.ajax({
+                url:url,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list) {
+                        let q = list[i];
+                        html+="<option value='"+q.base_areaid+"'>"+q.name+"</option>";
+                    }
+                    $("#op2").html(html);
+                    findCounty();
+                }
+            })
+        }
+
+        //查询地区
+        function findCounty() {
+            let county = $("#op2").find("option:selected").val();
+            let url = "/Book/basearea?op=findCounty&county="+county;
+            $.ajax({
+                url:url,
+                type:"post",
+                dataType:"json",
+                sync:true,
+                success:function (list) {
+                    let html = "";
+                    for (let i in list) {
+                            let q = list[i];
+                            html+="<option value='"+q.base_areaid+"'>"+q.name+"</option>";
+                    }
+                    $("#op3").html(html);
+                }
+            })
+        }
+    </script>
+<body>
+
+<table class="table table-hover table-bordered">
+    <caption>已保存的有效地址</caption>
+    <thead>
+    <tr>
+        <th>收货人姓名</th>
+        <th>联系方式</th>
+        <th>地址</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+
+    <hr style="background-color: #F5F5F5; width: 100%; height: 20px" size="200px"/>
+
+<form class="form-horizontal" role="form" style=" width: 70%; " id="fom">
+    <h3 style="margin-bottom: 20px" class="text-center">收货地址</h3>
+    <div class="form-group">
+        <div class="form-group has-success">
+            <label class="col-sm-4 control-label" for="adname">收货人姓名:</label>
+            <div class="col-sm-5">
+                <input type="text" class="form-control" id="adname" name="adname">
+            </div>
+        </div>
+        <div class="form-group has-success">
+            <label class="col-sm-4 control-label">所在地区:</label>
+                <select class="col-sm-1"  id="op1" style="padding-left: 6px; padding-bottom: 3px" onchange="findCity()" name="q1">
+                    <option></option>
+                </select>
+                <select class="col-sm-1" id="op2" style="padding-left: 6px; padding-bottom: 3px" onchange="findCounty()" name="q2">
+                    <option></option>
+                </select>
+                <select class="col-sm-1" id="op3" style="padding-left: 0; padding-bottom: 3px" name="q3">
+                    <option></option>
+                </select>
+        </div>
+        <div class="form-group has-success">
+            <label class="col-sm-4 control-label" for="adress">街道地址:</label>
+            <div class="col-sm-5">
+                <input type="text" class="form-control" id="adress" onkeyup="nowpassword()" name="adress">
+            </div>
+        </div>
+        <div class="form-group has-success">
+            <label class="col-sm-4 control-label" for="adphone">手机号码:</label>
+            <div class="col-sm-5">
+                <input type="text" class="form-control" id="adphone" onkeyup="nowpassword()" name="adphone">
+            </div>
+        </div>
+    <div class="btn-group btn-group-lg" style="margin-left: 330px">
+        <button type="button" class="btn btn-default btn-primary" onclick="insertADD()">保存</button>
+        <button type="reset" class="btn btn-default btn-danger">取消</button>
+    </div>
+    </div>
+</form>
+
+<!-- 修改模态框（Modal） -->
+<div class="modal fade" id="updatetype" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <form class="form-horizontal" role="form" id="fom2">
+        <input type="hidden" id="upadid" name="upadid"/>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">编辑地址信息</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="adid" id="updateadid">
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label " for="upadname">
+                            收货人姓名:
+                        </label>
+                        <div class="col-sm-10 " >
+                            <input type="text" class="form-control input-group-lg " id="upadname" name="upadname" >
+                        </div>
+                    </div>
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label " for="upadphone">
+                            手机号:
+                        </label>
+                        <div class="col-sm-10 " >
+                            <input type="text" class="form-control input-group-lg " id="upadphone" name="upadphone" >
+                        </div>
+                    </div>
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label " for="upadress">
+                            地址:
+                        </label>
+                        <div class="col-sm-10 " >
+                            <input type="text" class="form-control input-group-lg " id="upadress" name="upadress" >
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <input type="button" class="btn btn-primary" value="提交更改" onclick="updateID()" data-dismiss="modal"/>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </form>
+</div>
+
+
+<script>
+
+    //保存修改的数据
+    function updateID(){
+       let fom2 = $("#fom2").serialize();
+        $.ajax({
+            url:"/Book/address?op=updateID",
+            type:"post",
+            dataType:"json",
+            data: fom2,
+            sync: true,
+            success:function (b) {
+                if(b){
+                    findMore();
+                }else {
+                    alert("修改失败!");
+                }
+            }
+        })
+    }
+
+    //清空模态框内容
+    $(function () { $('#updatetype').on('hide.bs.modal', function (e) {
+        $('#fom2')[0].reset();
+    })
+    });
+
+     //新增一条数据
+     function insertADD() {
+       let op1 = $("#op1 option:selected").text();
+       let op2 = $("#op2 option:selected").text();
+       let op3 = $("#op3 option:selected").text();
+       let adname = $("#adname").val();
+       let adress = $("#adress").val();
+       let adphone = $("#adphone").val();
+       $.ajax({
+           url:"/Book/address?op=insertADD",
+           type:"post",
+           dataType:"json",
+           data:{"op1":op1,"op2":op2,"op3":op3,"adname":adname,"adress":adress,"adphone":adphone},
+           sync:true,
+           success:function (b) {
+            if(b){
+                findMore();
+            }else {
+                alert("新增失败!");
+            }
+            $("#fom")[0].reset();
+           }
+       })
+     }
+
+
+ </script>
+
+</body>
+</html>

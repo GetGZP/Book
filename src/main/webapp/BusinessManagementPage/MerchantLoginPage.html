@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商家登录页面</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/LoginPageStyleSheet.css">
+    <script language="JavaScript">
+        if (window != top)
+            top.location.href = location.href;
+    </script>
+</head>
+<body>
+<div id="main" class="col-lg-4 col-lg-offset-4  col-sm-6 col-sm-offset-3 col-xs-8 col-xs-offset-2 container col-center-block">
+    <h1>欢迎来到电商系统</h1>
+    <h1>请登录</h1>
+    <form class="form-horizontal" role="form" id="fom">
+        <div class="form-group" >
+            <label for="firstname" class="col-sm-2 control-label" >用户名:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="firstname" placeholder="请输入用户名" name="auser">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="lastname" class="col-sm-2 control-label">密码:</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="lastname" placeholder="请输入密码" name="apsw" onkeyup="Determine()">
+            </div>
+            <h4 style="color: lightsalmon"></h4>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary btn-lg" onclick="login()" >登录</button>
+        </div>
+    </form>
+</div>
+</body>
+    <script>
+        //设置一个全局变量,用来判断输入是否正确
+        let bl = false;
+        let newauser;
+        let newpsw;
+
+        //页面加载完成执行
+        $(function () {
+            bl =false;
+            newauser = "";
+            newpsw = "";
+            findMore();
+        })
+
+        //查询正确的账号和密码
+        function findMore() {
+            $.ajax({
+                url:"/Book/adminuser?op=findMore",
+                type:"post",
+                dataType:"json",
+                async:true,
+                success:function (list) {
+                    for (let i in list) {
+                        let q = list[i];
+                        newpsw = q.apsw;
+                        newauser = q.auser;
+                    }
+                }
+            })
+        }
+
+        //判定输入账号或者密码是否正确
+        function Determine() {
+            let auser = $("#firstname").val();
+            let apsw = $("#lastname").val();
+                if(auser == newauser && apsw == newpsw){
+                    bl = true;
+                    $("h4").text("输入正确!");
+                }else {
+                    bl =false;
+                    $("h4").text("账号或者密码输入错误,请重新输入!");
+                }
+        }
+
+        //点击登录按钮后触发的事件保存session对象,并且跳转到后台管理页面,如果验证未通过则重新输入
+        function login() {
+            let fom = $("#fom").serialize();
+            if(bl){
+               $.ajax({
+                   url: "/Book/adminuser?op=login",
+                   type: "post",
+                   dataType: "json",
+                   data:fom,
+                   async: false,
+                   success:function () {
+                       window.location.href=location.origin+'/Book/BusinessManagementPage/BusinessBackgroundHomePage.html';
+                       window.event.returnvalue=false;
+                   }
+               })
+            }else{
+                bl =false;
+                alert("登录失败,请重新登录!");
+                $("#firstname").val("");
+                $("#lastname").val("");
+            }
+        }
+    </script>
+</html>

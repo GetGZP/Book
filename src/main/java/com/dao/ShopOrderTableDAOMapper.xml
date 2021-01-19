@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.ShopOrderTableDAOMapper">
+
+    <resultMap id="sot" type="shopordertable">
+        <result column="onumbers" property="onumbers"/>
+        <result column="sonumber" property="sonumber"/>
+        <result column="sostotalprice" property="sostotalprice"/>
+        <association property="book" javaType="book">
+            <id column="bid" property="bid"/>
+            <result column="bname" property="bname"/>
+            <result column="bauthor" property="bauthor"/>
+            <result column="binventory" property="binventory"/>
+            <result column="bbaseprice" property="bbaseprice"/>
+            <result column="bprice" property="bprice"/>
+            <result column="bstate" property="bstate"/>
+            <result column="bnumbers" property="bnumbers"/>
+            <result column="bpress" property="bpress"/>
+            <result column="bpresstime" property="bpresstime"/>
+            <result column="bdetails" property="bdetails"/>
+            <result column="path" property="path"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertADDMore" parameterType="shopordertable">
+        insert into shopordertable
+        (onumbers, bid, sonumber, sostotalprice) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.onumbers},#{item.book.bid},#{item.sonumber},#{item.sostotalprice})
+        </foreach>
+    </insert>
+
+    <select id="findByMore" resultMap="sot">
+        select onumbers,sonumber, sostotalprice, shopordertable.bid, bname, bauthor, binventory, bbaseprice, bprice, bstate, bnumbers, bpress, bpresstime, bdetails, tid, path
+        from shopordertable
+        inner join book b on shopordertable.bid = b.bid
+        where onumbers=#{onumbers}
+    </select>
+
+</mapper>

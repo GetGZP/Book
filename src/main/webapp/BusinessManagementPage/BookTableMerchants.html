@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>书籍类型页面</title>
+    <script src="../boot&jquery/jquery-3.5.1.js"></script>
+    <script src="../boot&jquery/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../boot&jquery/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/HoriZontalCenterTable.css">
+</head>
+    <script>
+        //页面加载完成时去查询所有的书籍类型信息
+        $(function () {
+            show();
+        })
+
+        //清空模态框内容
+        $(function () { $('#myModal').on('hide.bs.modal', function (e) {
+            $('#fom')[0].reset();
+            $("#t1").attr("checked",false);
+            $("#t2").attr("checked",false);
+        })
+        });
+        $(function () { $('#insertADD').on('hide.bs.modal', function (e) {
+            $("#fom2")[0].reset();
+            $("#int1").attr("checked",false);
+            $("#int2").attr("checked",false);
+        })
+        });
+
+
+        //查询所有的书籍类型信息
+        function show() {
+            $.ajax({
+                url: "/Book/booktype?op=findMore",
+                type: "post",
+                dataType: "json",
+                sync: true,
+                success: function (list) {
+                    let html = "";
+                    for (let i in list) {
+                        let q = list[i];
+                        html += "<tr>" +
+                            "<td>" + q.tid + "</td>" +
+                            "<td>" + q.tname + "</td>" +
+                            "<td>" + q.tstate + "</td>" +
+                            "<td>" +
+                            "<button type='button' class='btn btn-primary btn-sm' onclick='findBY(" + q.tid + ")' data-toggle='modal' data-target='#myModal'>编辑</button>" +
+                            "<button type='button' class='btn btn-danger btn-sm' onclick='deleteID(" + q.tid + ")'>删除</button>" +
+                            "</td>" +
+                            "</tr>";
+                    }
+                    $("tbody").html(html);
+                }
+            })
+        }
+        
+        //单击编辑按钮时去查询数据
+        function findBY(tid) {
+            $.ajax({
+                url: "/Book/booktype?op=findBY&tid="+tid,
+                type: "post",
+                dataType: "json",
+                sync:true,
+                success:function (list) {
+                    for (let i in list){
+                        let q = list[i];
+                        $("[name=hdtid]").val(q.tid)
+                        $("[name=tname]").val(q.tname);
+                        if(q.tstate=="正常"){
+                            $("#t1").attr("checked",true);
+                        }else if(q.tstate=="异常"){
+                            $("#t2").attr("checked",true);
+                        }
+                    }
+                }
+            })
+        }
+        
+        //单击删除按钮去删除一条数据
+        function deleteID(tid) {
+            $.ajax({
+                url:"/Book/booktype?op=deleteID&tid="+tid,
+                type: "post",
+                dataType: "json",
+                sync:true,
+                success:function (b) {
+                    if(b){
+                        show();
+                    }else {
+                        alert("删除失败!");
+                    }
+                }
+            })
+        }
+    </script>
+<body>
+
+<table class="table table-hover table-bordered">
+    <caption class="text-center"><h4>类别管理</h4></caption>
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>书籍类型名称</th>
+        <th>类别状态</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+
+<input type="button" class="btn btn-primary btn-lg btn-block" value="添加类别"  data-toggle='modal' data-target='#insertADD'/>
+
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="fom">
+            <input type="hidden" name="hdtid">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑书籍类型信息</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group has-success show">
+                    <label class="col-sm-2 control-label " for="addtname">
+                        类型名称:
+                    </label>
+                    <div class="col-sm-10 " >
+                        <input type="text" class="form-control input-group-lg " id="addtname" name="tname" >
+                    </div>
+                </div>
+                <br/><br/><br/>
+                <div class="form-group has-success show">
+                <label class="col-sm-2 control-label ">
+                    类别状态:
+                </label>
+                <div class="form-group has-success show">
+                    <label for="t1">正常</label><input type="radio" name="state" id="t1" value="正常">
+                    <label for="t2">异常</label><input type="radio" name="state" id="t2" value="异常">
+                </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-default" data-dismiss="modal" value="关闭"/>
+                <input type="button" class="btn btn-primary" onclick="updateID()" data-dismiss="modal" value="提交更改"/>
+            </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 新增模态框（Modal） -->
+<div class="modal fade" id="insertADD" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="fom2">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" >新增书籍类型</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label " for="inserttname">
+                            类型名称:
+                        </label>
+                        <div class="col-sm-10 " >
+                            <input type="text" class="form-control input-group-lg " id="inserttname" name="intname" >
+                        </div>
+                    </div>
+                    <br/><br/><br/>
+                    <div class="form-group has-success show">
+                        <label class="col-sm-2 control-label ">
+                            类别状态:
+                        </label>
+                        <div class="form-group has-success show">
+                            <label for="int1">正常</label><input type="radio" name="instate" id="int1" value="正常">
+                            <label for="int2">异常</label><input type="radio" name="instate" id="int2" value="异常">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="关闭"/>
+                    <input type="button" class="btn btn-primary" onclick="insertADD()" data-dismiss="modal" value="新增"/>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+</body>
+    <script>
+
+        //点击提交更改
+        function updateID() {
+            let fom = $("#fom").serialize();
+            $.ajax({
+                url:"/Book/booktype?op=updateID",
+                type:"post",
+                dataType:"json",
+                sync: true,
+                data:fom,
+                success:function (b) {
+                    if(b){
+                        show();
+                    }else {
+                        alert("修改失败!");
+                    }
+                }
+            })
+        }
+
+        //添加一条数据
+       function insertADD(){
+           let fom = $("#fom2").serialize();
+            $.ajax({
+                url:"/Book/booktype?op=insertADD",
+                type:"post",
+                dataType:"json",
+                sync: true,
+                data:fom,
+                success:function (b) {
+                    if(b){
+                        show();
+                    }else {
+                        alert("新增失败!");
+                    }
+                }
+            })
+       }
+    </script>
+</html>
